@@ -1,50 +1,334 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gather Auto Block</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      margin: 16px;
-      width: 250px;
-      color: #333;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      width: 320px;
+      min-height: 400px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      overflow: hidden;
+    }
+
+    .container {
+      background: white;
+      margin: 0;
+      min-height: 400px;
+      position: relative;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .logo svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+
     h1 {
-      font-size: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .content {
+      padding: 24px 20px;
+    }
+
+    .shortcut-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .shortcut-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .shortcut-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 8px;
     }
-    p {
-      margin: 4px 0;
+
+    .shortcut-keys {
+      display: flex;
+      gap: 4px;
+      align-items: center;
     }
+
     code {
-      background: #f1f1f1;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 13px;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      min-width: 24px;
+      text-align: center;
     }
+
+    .plus {
+      color: #9ca3af;
+      font-weight: 400;
+      font-size: 14px;
+    }
+
+    p {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .status-section {
+      margin-bottom: 24px;
+    }
+
+    .status-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
     .status {
-      margin-top: 12px;
-      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      border-left: 4px solid #94a3b8;
+      font-weight: 500;
+      color: #374151;
     }
+
+    .status.active {
+      background: #ecfdf5;
+      border-left-color: #10b981;
+      color: #065f46;
+    }
+
+    .status.inactive {
+      background: #fef2f2;
+      border-left-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+      animation: pulse 2s infinite;
+    }
+
+    .status.active .status-dot {
+      background: #10b981;
+    }
+
+    .status.inactive .status-dot {
+      background: #ef4444;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
     .toggle-btn {
-      margin-top: 8px;
-      padding: 6px 12px;
-      background: #007bff;
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
+      border-radius: 10px;
       color: white;
-      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toggle-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .toggle-btn:active {
+      transform: translateY(0);
+    }
+
+    .toggle-btn.inactive {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .toggle-btn.inactive:hover {
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(0);
+      animation: ripple-animation 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .footer {
+      padding: 16px 20px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .version {
+      font-weight: 600;
+      color: #667eea;
     }
   </style>
 </head>
+
 <body>
-  <h1>Gather Auto Block</h1>
-  <p><b>Atalho:</b> <code>Ctrl + Shift + B</code></p>
-  <p>Bloqueia automaticamente área de reunião e mostra feedback.</p>
-  <div class="status" id="status">Status: ...</div>
-  <button class="toggle-btn" id="toggleBtn">Alternar</button>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <div class="logo">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+        </div>
+        <h1>Gather Auto Block</h1>
+        <div class="subtitle">Controle Inteligente de Reuniões</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="shortcut-card">
+        <div class="shortcut-label">Atalho Rápido</div>
+        <p><b>Atalho:</b> <code>Ctrl</code> <span class="plus">+</span> <code>Shift</code> <span class="plus">+</span>
+          <code>B</code></p>
+      </div>
+
+      <p>Bloqueia automaticamente área de reunião e mostra feedback.</p>
+
+      <div class="status-section">
+        <div class="status-label">Status Atual</div>
+        <div class="status" id="status">
+          <div class="status-dot"></div>
+          <span>Status: ...</span>
+        </div>
+      </div>
+
+      <button class="toggle-btn" id="toggleBtn">Alternar</button>
+    </div>
+
+    <div class="footer">
+      <div class="footer-text">
+        Versão <span class="version">1.0.0</span> • Vibe Codado com ❤️ por @Kc1t
+      </div>
+    </div>
+  </div>
+
   <script src="popup.js"></script>
 </body>
+
 </html>
