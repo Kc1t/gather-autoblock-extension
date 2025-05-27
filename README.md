@@ -9,8 +9,10 @@
 
   <h3 align="center">Gather Auto Block</h3>
 
+
 > [!IMPORTANT]
 > Esta extensão é um projeto pessoal e não possui relação oficial com a plataforma Gather. Use por sua conta e risco.
+
 
   <p align="center">
     Extensão para bloquear automaticamente áreas de reunião no Gather Town.
@@ -154,7 +156,7 @@ Distribuído sob a licença MIT. Consulte `LICENSE.txt` para obter mais informa�
 
 ## Contato
 
-Kauã Miguel - [Portfólio](https://kc1t.com) - (11) 98468-1739
+Kauã Miguel - [Portfólio](https://kc1t.com) 
 
 Link do Projeto: [https://github.com/Kc1t/gather-auto-block](https://github.com/Kc1t/gather-auto-block)
 
