@@ -3,7 +3,11 @@
   "name": "Gather Auto Block",
   "version": "1.0",
   "description": "Bloqueia automaticamente a área de reunião no Gather e exibe feedback visual.",
-  "permissions": ["storage", "scripting", "activeTab"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -14,8 +18,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://app.gather.town/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://app.gather.town/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
