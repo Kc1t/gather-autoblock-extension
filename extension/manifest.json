@@ -5,8 +5,7 @@
   "description": "Bloqueia automaticamente a área de reunião no Gather e exibe feedback visual.",
   "permissions": [
     "storage",
-    "activeTab",
-    "tabs"
+    "activeTab"
   ],
   "action": {
     "default_popup": "popup.html",
