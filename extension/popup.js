@@ -3,8 +3,12 @@ const toggleBtn = document.getElementById('toggleBtn');
 
 // Atualiza UI
 function updateStatus(ativo) {
-  statusEl.textContent = 'Status: ' + (ativo ? 'Ativo' : 'Desativado');
-  statusEl.style.color = ativo ? 'green' : 'red';
+  statusEl.textContent = ativo ? '🔒 Proteção Ativa' : '🔓 Proteção Desativada';
+  statusEl.style.color = ativo ? '#4CAF50' : '#f44336';
+  statusEl.style.fontWeight = '500';
+  
+  // Atualiza o texto do botão
+  toggleBtn.textContent = ativo ? 'Desativar Proteção' : 'Ativar Proteção';
 }
 
 // Pega estado do storage

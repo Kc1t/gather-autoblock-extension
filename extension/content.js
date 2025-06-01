@@ -71,21 +71,27 @@ function isUserAtOwnTable() {
   return tableOwnerName === currentUserName;
 }
 
-// Clica no botão do menu de área de reunião
+// Clica no botão do menu de área de reunião (sempre necessário para ativar as opções)
 function clicarBotaoAbrirMenu() {
   if (!ativado) return;
   
   if (!isUserAtOwnTable()) {
-    console.log('[Gather Auto Block] Não está na própria mesa, ignorando...');
+    console.log('[Gather Auto Block] Usuário não está em sua própria mesa, pulando ação...');
     return;
   }
   
-  const botaoMenu = [...document.querySelectorAll('button')]
-    .find(btn => btn.querySelector('svg path[d*="M12 10.354"]'));
+  // Procura pelo botão do menu (três pontos)
+  const botaoMenu = document.querySelector('button.css-3n6mkb[kind="primary"]');
   if (botaoMenu && !botaoMenu.dataset._clicado) {
     botaoMenu.click();
     botaoMenu.dataset._clicado = 'true';
-    showToast('Menu da área de reunião aberto');
+    showToast('Abrindo opções da mesa...');
+    
+    // Aguarda um pouco e revalida as opções de bloqueio
+    setTimeout(() => {
+      clicarBotaoBloquear();
+      clicarBotaoDesbloqueio();
+    }, 500);
   }
 }
 
@@ -94,7 +100,7 @@ function clicarBotaoBloquear() {
   if (!ativado) return;
   
   if (!isUserAtOwnTable()) {
-    console.log('[Gather Auto Block] Não está na própria mesa, não bloqueando...');
+    console.log('[Gather Auto Block] Não é possível bloquear mesa de outro usuário');
     return;
   }
   
@@ -103,7 +109,7 @@ function clicarBotaoBloquear() {
   if (botao && !botao.dataset._bloqueadoAuto) {
     botao.click();
     botao.dataset._bloqueadoAuto = 'true';
-    showToast('Área de reunião bloqueada');
+    showToast('Mesa bloqueada com sucesso ✓');
   }
 }
 
@@ -112,7 +118,7 @@ function clicarBotaoDesbloqueadoSeExistir() {
   if (!ativado) return;
   
   if (!isUserAtOwnTable()) {
-    console.log('[Gather Auto Block] Não está na própria mesa, não rebloqueando...');
+    console.log('[Gather Auto Block] Mesa não pertence ao usuário atual, mantendo estado');
     return;
   }
   
@@ -120,7 +126,7 @@ function clicarBotaoDesbloqueadoSeExistir() {
   if (btnDesbloqueado && !btnDesbloqueado.dataset._bloqueadoAuto) {
     btnDesbloqueado.click();
     btnDesbloqueado.dataset._bloqueadoAuto = 'true';
-    showToast('Área de reunião estava desbloqueada. Rebloqueando...');
+    showToast('Ops! Mesa estava aberta, bloqueando novamente...');
   }
 }
 
@@ -129,7 +135,7 @@ function clicarBotaoDesbloqueio() {
   if (!ativado) return;
   
   if (!isUserAtOwnTable()) {
-    console.log('[Gather Auto Block] Não está na própria mesa, não bloqueando sala aberta...');
+    console.log('[Gather Auto Block] Mesa de outro usuário detectada, sem alterações necessárias');
     return;
   }
   
@@ -138,20 +144,52 @@ function clicarBotaoDesbloqueio() {
   if (btnDesbloqueio) {
     btnDesbloqueio.click();
     btnDesbloqueio.dataset._bloqueadoAuto = 'true';
-    showToast('Sala estava aberta. Bloqueando...');
-    console.log('[Gather Auto Block] Sala aberta detectada e bloqueada');
+    showToast('Mesa estava aberta, aplicando bloqueio...');
+    console.log('[Gather Auto Block] ✓ Mesa automaticamente protegida');
   }
 }
 
-// Observa mudanças no DOM
+// Watcher dedicado para o botão de desbloqueio
+const unlockButtonWatcher = new MutationObserver((mutations) => {
+  // Verifica PRIMEIRO se está ativado
+  if (!ativado) {
+    console.log('[Gather Auto Block] Watcher detectou botão mas extensão está DESATIVADA');
+    return;
+  }
+  
+  // Verifica se está na própria mesa antes de fazer qualquer ação
+  if (!isUserAtOwnTable()) {
+    console.log('[Gather Auto Block] Watcher: não está na própria mesa');
+    return;
+  }
+  
+  // Procura pelo botão de desbloqueio em todas as mutações
+  const unlockButton = document.querySelector('button[aria-label="botão de bloqueio da área atual"]:not([data-_bloqueado-auto])');
+  if (unlockButton) {
+    console.log('[Gather Auto Block] Watcher: botão encontrado, estado ativado:', ativado);
+    unlockButton.click();
+    unlockButton.dataset._bloqueadoAuto = 'true';
+    showToast('🔒 Mesa protegida automaticamente!');
+    console.log('[Gather Auto Block] ⚡ Botão de desbloqueio detectado e clicado instantaneamente');
+  }
+});
+
+// Inicia o watcher dedicado para o botão de desbloqueio
+unlockButtonWatcher.observe(document.body, { 
+  childList: true, 
+  subtree: true, 
+  attributes: true, 
+  attributeFilter: ['aria-label', 'class'] 
+});
+
+// Observa mudanças no DOM (watcher principal)
 const observer = new MutationObserver((mutations) => {
   if (!ativado) return;
   for (const mutation of mutations) {
     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+      // Sempre tenta abrir o menu primeiro
       clicarBotaoAbrirMenu();
-      clicarBotaoBloquear();
-      clicarBotaoDesbloqueadoSeExistir();
-      clicarBotaoDesbloqueio(); // Nova função
+      // As outras funções são chamadas automaticamente após abrir o menu
     }
   }
 });
@@ -162,8 +200,8 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'b') {
     ativado = !ativado;
     chrome.storage.local.set({ gatherAutoBlock: ativado });
-    showToast(`Auto-bloqueio ${ativado ? 'ativado' : 'desativado'}`);
-    console.log('[Gather Auto Block] Atalho usado. Estado agora:', ativado);
+    showToast(`Proteção automática ${ativado ? 'ativada' : 'desativada'} 🔒`);
+    console.log(`[Gather Auto Block] Proteção ${ativado ? 'ATIVADA' : 'DESATIVADA'} via atalho de teclado`);
   }
 });
 
@@ -171,13 +209,11 @@ document.addEventListener('keydown', (e) => {
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'TOGGLE_GATHER_BLOCK') {
     ativado = msg.ativo;
-    showToast(`Auto-bloqueio ${ativado ? 'ativado' : 'desativado'}`);
-    console.log('[Gather Auto Block] Estado alterado via popup:', ativado);
+    console.log(`[Gather Auto Block] Estado alterado para: ${ativado ? 'ATIVO' : 'INATIVO'}`);
+    showToast(`Proteção automática ${ativado ? 'ativada' : 'desativada'} 🔒`);
+    console.log(`[Gather Auto Block] Estado alterado via interface: ${ativado ? 'ATIVO' : 'INATIVO'}`);
   }
 });
 
 // Execução inicial
 clicarBotaoAbrirMenu();
-clicarBotaoBloquear();
-clicarBotaoDesbloqueadoSeExistir();
-clicarBotaoDesbloqueio(); // Nova função

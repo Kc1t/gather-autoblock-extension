@@ -4,14 +4,14 @@
 <br />
 <div align="center">
   <a href="https://github.com/Kc1t/gather-auto-block">
-    <img src="icon.png" alt="Logo" width="80" height="80">
+    <img src="/extension/icon.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Gather Auto Block</h3>
 
 
-> [!IMPORTANT]
-> Esta extensão é um projeto pessoal e não possui relação oficial com a plataforma Gather. Use por sua conta e risco.
+  > [!IMPORTANT]
+  > Esta extensão é um projeto pessoal e não possui relação oficial com a plataforma Gather. Use por sua conta e risco.
 
 
   <p align="center">
@@ -54,7 +54,7 @@
 
 <div id="sobre-o-projeto"></div>
 
-![Header](icon.png)
+![Header](/extension/icon.png)
 
 Extensão para Chrome que bloqueia automaticamente áreas de reunião no Gather Town, garantindo privacidade e controle durante reuniões. Desenvolvida para facilitar o gerenciamento de espaços virtuais, com feedback visual e atalho rápido para ativação/desativação.
 
@@ -151,7 +151,7 @@ Distribuído sob a licença MIT. Consulte `LICENSE.txt` para obter mais informa�
 <div id="contato"></div>
 
 <div align="center">
-  <img src="icon.png" alt="Logo" width="80" height="80">
+  <img src="/extension/icon.png" alt="Logo" width="80" height="80">
 </div>
 
 ## Contato
