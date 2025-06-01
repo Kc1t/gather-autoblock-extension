@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gather Auto Block",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Bloqueia automaticamente a área de reunião no Gather e exibe feedback visual.",
   "permissions": [
     "storage",

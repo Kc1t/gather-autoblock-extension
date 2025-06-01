@@ -1,5 +1,12 @@
 let ativado = true;
 
+// Seletores para verificar se está na própria mesa
+const SELECTORS = {
+  TABLE_NAME: 'span.css-1l3f3dx', // Span com nome da mesa
+  USER_NAME: 'span[color="white"].css-1n1bhhn', // Span branco com nome do usuário
+  TABLE_PATTERN: /Mesa de (.+)/i // Padrão para extrair nome do dono da mesa
+};
+
 // Recupera estado inicial salvo
 chrome.storage?.local.get(['gatherAutoBlock'], (result) => {
   ativado = result.gatherAutoBlock ?? true;
@@ -40,9 +47,39 @@ function showToast(msg) {
   }, 3000);
 }
 
+// Verifica se o usuário está na própria mesa
+function isUserAtOwnTable() {
+  // Procura pelo nome da mesa
+  const mesaElement = document.querySelector(SELECTORS.TABLE_NAME);
+  if (!mesaElement) return false;
+  
+  // Procura pelo nome do usuário (span branco)
+  const userElement = document.querySelector(SELECTORS.USER_NAME);
+  if (!userElement) return false;
+  
+  const mesaText = mesaElement.textContent.trim();
+  const userName = userElement.textContent.trim();
+  
+  // Extrai o nome da mesa usando regex
+  const tableMatch = mesaText.match(SELECTORS.TABLE_PATTERN);
+  if (!tableMatch) return false;
+  
+  const tableOwnerName = tableMatch[1].toLowerCase();
+  const currentUserName = userName.toLowerCase();
+  
+  // Verifica se o nome do dono da mesa é igual ao nome do usuário atual
+  return tableOwnerName === currentUserName;
+}
+
 // Clica no botão do menu de área de reunião
 function clicarBotaoAbrirMenu() {
   if (!ativado) return;
+  
+  if (!isUserAtOwnTable()) {
+    console.log('[Gather Auto Block] Não está na própria mesa, ignorando...');
+    return;
+  }
+  
   const botaoMenu = [...document.querySelectorAll('button')]
     .find(btn => btn.querySelector('svg path[d*="M12 10.354"]'));
   if (botaoMenu && !botaoMenu.dataset._clicado) {
@@ -55,6 +92,12 @@ function clicarBotaoAbrirMenu() {
 // Clica no botão de bloquear
 function clicarBotaoBloquear() {
   if (!ativado) return;
+  
+  if (!isUserAtOwnTable()) {
+    console.log('[Gather Auto Block] Não está na própria mesa, não bloqueando...');
+    return;
+  }
+  
   const botao = [...document.querySelectorAll('button')]
     .find(btn => btn.textContent.includes('Bloquear área de reunião'));
   if (botao && !botao.dataset._bloqueadoAuto) {
@@ -67,11 +110,36 @@ function clicarBotaoBloquear() {
 // Detecta botão de desbloqueio manual e reverte
 function clicarBotaoDesbloqueadoSeExistir() {
   if (!ativado) return;
+  
+  if (!isUserAtOwnTable()) {
+    console.log('[Gather Auto Block] Não está na própria mesa, não rebloqueando...');
+    return;
+  }
+  
   const btnDesbloqueado = document.querySelector('button[aria-label="botão de bloqueio da área atual"]');
   if (btnDesbloqueado && !btnDesbloqueado.dataset._bloqueadoAuto) {
     btnDesbloqueado.click();
     btnDesbloqueado.dataset._bloqueadoAuto = 'true';
     showToast('Área de reunião estava desbloqueada. Rebloqueando...');
+  }
+}
+
+// Detecta e clica no botão de desbloqueio (sala aberta) para bloquear
+function clicarBotaoDesbloqueio() {
+  if (!ativado) return;
+  
+  if (!isUserAtOwnTable()) {
+    console.log('[Gather Auto Block] Não está na própria mesa, não bloqueando sala aberta...');
+    return;
+  }
+  
+  // Procura pelo botão de desbloqueio (sala aberta)
+  const btnDesbloqueio = document.querySelector('button[aria-label="botão de bloqueio da área atual"]:not([data-_bloqueado-auto])');
+  if (btnDesbloqueio) {
+    btnDesbloqueio.click();
+    btnDesbloqueio.dataset._bloqueadoAuto = 'true';
+    showToast('Sala estava aberta. Bloqueando...');
+    console.log('[Gather Auto Block] Sala aberta detectada e bloqueada');
   }
 }
 
@@ -83,6 +151,7 @@ const observer = new MutationObserver((mutations) => {
       clicarBotaoAbrirMenu();
       clicarBotaoBloquear();
       clicarBotaoDesbloqueadoSeExistir();
+      clicarBotaoDesbloqueio(); // Nova função
     }
   }
 });
@@ -111,3 +180,4 @@ chrome.runtime.onMessage.addListener((msg) => {
 clicarBotaoAbrirMenu();
 clicarBotaoBloquear();
 clicarBotaoDesbloqueadoSeExistir();
+clicarBotaoDesbloqueio(); // Nova função
